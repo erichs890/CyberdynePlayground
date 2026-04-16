@@ -2,7 +2,7 @@
   "version": 2,
   "framework": null,
   "installCommand": "npm install --prefix backend && npm install --prefix frontend",
-  "buildCommand": "cd frontend && npx --yes vite build",
+  "buildCommand": "cd frontend && node ./node_modules/vite/bin/vite.js build",
   "outputDirectory": "frontend/dist",
   "functions": {
     "api/index.js": {
