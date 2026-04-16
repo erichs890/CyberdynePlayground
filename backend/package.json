@@ -4,12 +4,13 @@
   "description": "Intentionally vulnerable backend for CyberDyne DAST/SAST calibration. DO NOT DEPLOY TO PRODUCTION.",
   "main": "src/server.js",
   "scripts": {
-    "seed": "node --experimental-sqlite src/db/seed.js",
-    "start": "node --experimental-sqlite src/server.js",
-    "dev": "nodemon --exec 'node --experimental-sqlite' src/server.js"
+    "seed": "node src/db/seed.js",
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
   },
   "dependencies": {
     "axios": "^1.6.8",
+    "better-sqlite3": "^12.9.0",
     "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

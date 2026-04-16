@@ -1,6 +1,4 @@
-// Seed runner usando node:sqlite (nativo, Node >= 22.5).
-// Uso: npm run seed
-const { DatabaseSync } = require('node:sqlite');
+const Database = require('better-sqlite3');
 const fs = require('fs');
 const path = require('path');
 
@@ -19,11 +17,11 @@ if (fs.existsSync(DB_PATH)) {
   }
 }
 
-const db = new DatabaseSync(DB_PATH);
+const db = new Database(DB_PATH);
 const sql = fs.readFileSync(SQL_PATH, 'utf8');
 db.exec(sql);
 
 console.log('[seed] banco criado em:', DB_PATH);
-console.log('[seed] usuários:', db.prepare('SELECT COUNT(*) c FROM users').get().c);
+console.log('[seed] usuarios:', db.prepare('SELECT COUNT(*) c FROM users').get().c);
 console.log('[seed] produtos:', db.prepare('SELECT COUNT(*) c FROM products').get().c);
 db.close();

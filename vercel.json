@@ -1,0 +1,29 @@
+{
+  "version": 2,
+  "framework": null,
+  "buildCommand": "cd frontend && npm install && npx vite build",
+  "outputDirectory": "frontend/dist",
+  "installCommand": "cd backend && npm install",
+  "functions": {
+    "api/index.js": {
+      "runtime": "@vercel/node@3",
+      "includeFiles": "backend/**"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/(.*)", "destination": "/api" },
+    { "source": "/app/(.*)", "destination": "/api" },
+    { "source": "/app", "destination": "/api" },
+    { "source": "/sitemap.xml", "destination": "/api" },
+    { "source": "/robots.txt", "destination": "/api" },
+    { "source": "/wp-login.php", "destination": "/api" },
+    { "source": "/wp-admin", "destination": "/api" },
+    { "source": "/wp-admin/(.*)", "destination": "/api" },
+    { "source": "/wp-json/(.*)", "destination": "/api" },
+    { "source": "/wp-content/(.*)", "destination": "/api" },
+    { "source": "/wp-config.php.bak", "destination": "/api" },
+    { "source": "/wp-author", "destination": "/api" },
+    { "source": "/xmlrpc.php", "destination": "/api" },
+    { "source": "/readme.html", "destination": "/api" }
+  ]
+}
