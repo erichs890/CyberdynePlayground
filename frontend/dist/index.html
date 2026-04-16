@@ -3,12 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <!-- ================================================================
-         VULN-201  CSP PROPOSITALMENTE ABERTO (unsafe-inline + unsafe-eval)
-         CWE-693  |  OWASP A05:2021  |  CVSS 6.1
-         Permite execucao de qualquer inline script e eval(). Um scanner
-         DAST deve flaggear unsafe-inline e unsafe-eval como misconfiguration.
-         ================================================================ -->
     <meta http-equiv="Content-Security-Policy"
           content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;
                    script-src * 'unsafe-inline' 'unsafe-eval';
@@ -17,42 +11,22 @@
                    connect-src *;
                    frame-src *;
                    object-src *;" />
-
-    <!-- VULN-202  MISSING SECURITY HEADERS (no X-Frame-Options, no HSTS in meta) -->
-    <!-- Nenhum X-Frame-Options, nenhum Referrer-Policy, nenhum Permissions-Policy -->
-
-    <!-- VULN-217  VERSION/TECH DISCLOSURE EM COMENTARIOS HTML -->
-    <!-- Powered by: React 18.3.1 | Vite 5.2 | Node 24 -->
-    <!-- Build: vulnhub-frontend@0.1.0 | Internal build #2026-04-15 -->
-    <!-- TODO: remover antes de prod — admin panel em /super-secret-panel -->
-    <!-- JWT_SECRET=secret123 | ADMIN=admin/admin123 -->
-    <!-- Endpoint interno: http://10.0.0.5:3000/api/debug/info -->
-
-    <title>VulnHub - CyberDyne Target</title>
-
-    <!-- VULN-213  INLINE SCRIPT COM SECRETS (visivel no source da pagina) -->
+    <title>Cyberdyne Systems — Defense & AI Solutions</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚙️</text></svg>">
     <script>
-      // CONFIG GLOBAL — exposta no window (CWE-615)
-      window.__APP_CONFIG__ = {
-        API_BASE: 'http://localhost:3000/api',
-        JWT_SECRET: 'secret123',
-        ADMIN_TOKEN: 'GOD_MODE_2026',
-        STRIPE_PK: 'pk_live_51FakePublishableKeyxxxxxxxxxxxxxxxxxxxxxxxxx',
-        FIREBASE_KEY: 'AIzaSyFAKE-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-        INTERNAL_API: 'http://10.0.0.5:3000/api',
-        AWS_KEY: 'AKIAIOSFODNN7EXAMPLE',
-        DEBUG: true
+      window.__CONFIG__ = {
+        API: '/api',
+        STRIPE: 'pk_live_51FakePublishableKeyxxxxxxxxxxxxxxxxxxxxxxxxx',
+        FIREBASE: 'AIzaSyFAKE-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
+        MAPS: 'AIzaSyFAKE_MAPS_KEY_xxxxxxxxxxxxxxxxxx',
+        SENTRY: 'https://fakekey@sentry.io/1234567',
+        GA: 'UA-000000-1'
       };
-      // Funcao global insegura que executa JS arbitrario
-      window.vulnEval = function(code) { return eval(code); };
     </script>
-    <script type="module" crossorigin src="/assets/index-6Lil5-5U.js"></script>
+    <script type="module" crossorigin src="/assets/index-CB0Z_na3.js"></script>
   </head>
-  <body>
+  <body style="margin:0;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif">
     <div id="root"></div>
-
-    <!-- VULN-214  TRACKING PIXEL / BEACON SEM CONSENT -->
-    <img src="http://analytics.cyberdyne.fake/pixel.gif?page=index&uid=leak" width="1" height="1" style="display:none" />
-    <noscript><img src="http://analytics.cyberdyne.fake/noscript.gif" /></noscript>
+    <img src="http://analytics.cyberdyne.systems/t.gif?r=index" width="1" height="1" style="position:absolute;opacity:0" />
   </body>
 </html>

@@ -1,199 +1,158 @@
-// =====================================================================
-// VulnHub Frontend — React SPA
-// VULN-070..080 (Lote original) + VULN-201..217 (Browser Mimic)
-// =====================================================================
-import React from 'react';
-import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
+import { colors, layout, btn } from './styles.js';
 
-// Lote original (070..080)
-import DomXss from './components/DomXss.jsx';
-import StorageLeak from './components/StorageLeak.jsx';
-import HiddenAdmin from './components/HiddenAdmin.jsx';
-import CspBypass from './components/CspBypass.jsx';
-import Comments from './components/Comments.jsx';
-import SearchBar from './components/SearchBar.jsx';
+import Shop from './pages/Shop.jsx';
+import ProductDetail from './pages/ProductDetail.jsx';
+import Login from './pages/Login.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+import Support from './pages/Support.jsx';
+import Search from './pages/Search.jsx';
+import Tools from './pages/Tools.jsx';
 
-// Lote 201..217 (Browser Mimic)
-import DomXssAdvanced from './components/DomXssAdvanced.jsx';
-import InsecureStorage from './components/InsecureStorage.jsx';
-import PostMessageLab from './components/PostMessageLab.jsx';
-import { AdminUsers, AdminSecrets, SqlConsole, DebugState } from './components/HiddenRoutes.jsx';
+// Hidden routes (no links)
+import AdminPanel from './pages/AdminPanel.jsx';
+import DebugConsole from './pages/DebugConsole.jsx';
 
-// VULN-213: secrets hardcoded no JS bundle (SAST target)
-// eslint-disable-next-line
-const INTERNAL_API_KEY = 'sk-cyberdyne-internal-FAKEFAKE1234';
-// eslint-disable-next-line
-const DB_CONN_STRING = 'postgresql://admin:admin123@db.cyberdyne.internal:5432/vulnhub';
-// eslint-disable-next-line
-const PRIVATE_KEY = '-----BEGIN RSA PRIVATE KEY-----\nMIIEowIBAAKCAQEA0FAKEKEY\n-----END RSA PRIVATE KEY-----';
+const INTERNAL_KEY = 'sk-cyberdyne-internal-FAKEFAKE1234';
+const DB_URI = 'postgresql://admin:admin123@db.cyberdyne.internal:5432/main';
 
 export default function App() {
   return (
     <BrowserRouter>
-      <div style={{ fontFamily: 'monospace', padding: 24, maxWidth: 960, margin: '0 auto' }}>
-        <Header />
-        <Routes>
-          <Route path="/" element={<Home />} />
-
-          {/* Rotas visiveis (linkadas na nav) */}
-          <Route path="/search" element={<SearchBar />} />
-          <Route path="/dom-xss" element={<DomXss />} />
-          <Route path="/dom-xss-advanced" element={<DomXssAdvanced />} />
-          <Route path="/comments" element={<Comments />} />
-          <Route path="/storage" element={<InsecureStorage />} />
-          <Route path="/storage-legacy" element={<StorageLeak />} />
-          <Route path="/csp-test" element={<CspBypass />} />
-          <Route path="/postmessage" element={<PostMessageLab />} />
-
-          {/* ============================================================
-              VULN-212: HIDDEN ROUTES — sem link na UI, sem auth guard
-              Descobriveis via: JS bundle inspection, directory brute-force,
-              ou lendo este source code (source maps habilitados).
-              ============================================================ */}
-          <Route path="/admin-debug" element={<HiddenAdmin />} />
-          <Route path="/internal/config" element={<HiddenAdmin />} />
-          <Route path="/super-secret-panel" element={<HiddenAdmin />} />
-          <Route path="/admin/users" element={<AdminUsers />} />
-          <Route path="/admin/secrets" element={<AdminSecrets />} />
-          <Route path="/admin/sql-console" element={<SqlConsole />} />
-          <Route path="/debug/state" element={<DebugState />} />
-          <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/_internal/health" element={<InternalHealth />} />
-          <Route path="/dev/feature-flags" element={<FeatureFlags />} />
-        </Routes>
+      <div style={{ background: colors.primary, minHeight: '100vh', color: colors.text }}>
+        <Navbar />
+        <div style={layout.page}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/shop" element={<Shop />} />
+            <Route path="/shop/:id" element={<ProductDetail />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/support" element={<Support />} />
+            <Route path="/search" element={<Search />} />
+            <Route path="/tools" element={<Tools />} />
+            <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/admin/users" element={<AdminPanel section="users" />} />
+            <Route path="/admin/sql" element={<AdminPanel section="sql" />} />
+            <Route path="/admin/config" element={<AdminPanel section="config" />} />
+            <Route path="/debug" element={<DebugConsole />} />
+            <Route path="/debug/state" element={<DebugConsole />} />
+            <Route path="/_internal" element={<DebugConsole />} />
+          </Routes>
+        </div>
+        <Footer />
       </div>
     </BrowserRouter>
   );
 }
 
-function Header() {
+function Navbar() {
   const loc = useLocation();
-  const isHidden = loc.pathname.startsWith('/admin') || loc.pathname.startsWith('/debug') ||
-                   loc.pathname.startsWith('/_internal') || loc.pathname.startsWith('/dev') ||
-                   loc.pathname === '/super-secret-panel' || loc.pathname === '/internal/config';
+  const jwt = localStorage.getItem('jwt');
+  const user = jwt ? JSON.parse(localStorage.getItem('user') || '{}') : null;
+
+  const linkStyle = (path) => ({
+    color: loc.pathname === path ? colors.accent : colors.textMuted,
+    textDecoration: 'none',
+    fontSize: 14,
+    fontWeight: loc.pathname === path ? 700 : 400,
+    transition: 'color 0.2s'
+  });
 
   return (
-    <div style={{ marginBottom: 24 }}>
-      <h1>VulnHub API &amp; Web</h1>
-      {isHidden && (
-        <div style={{ background: '#d32f2f', color: '#fff', padding: 12, marginBottom: 12 }}>
-          HIDDEN ROUTE: <code>{loc.pathname}</code> — esta rota nao possui link visivel nem auth guard.
+    <nav style={{ background: colors.surface, borderBottom: `1px solid ${colors.border}`, padding: '0 24px' }}>
+      <div style={{ ...layout.page, display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 64 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 32 }}>
+          <Link to="/" style={{ color: colors.white, textDecoration: 'none', fontSize: 18, fontWeight: 700, letterSpacing: 1 }}>
+            ⚙ CYBERDYNE
+          </Link>
+          <Link to="/shop" style={linkStyle('/shop')}>Store</Link>
+          <Link to="/support" style={linkStyle('/support')}>Support</Link>
+          <Link to="/tools" style={linkStyle('/tools')}>Tools</Link>
+          <Link to="/search" style={linkStyle('/search')}>Search</Link>
         </div>
-      )}
-      <p style={{ color: 'crimson' }}>
-        <b>AVISO:</b> aplicacao intencionalmente vulneravel. Alvo exclusivo do scanner CyberDyne.
-      </p>
-      <nav style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-        <Link to="/">Home</Link>
-        <Link to="/search">Search</Link>
-        <Link to="/dom-xss">DOM XSS</Link>
-        <Link to="/dom-xss-advanced">DOM XSS v2</Link>
-        <Link to="/comments">Comments</Link>
-        <Link to="/storage">Storage</Link>
-        <Link to="/csp-test">CSP</Link>
-        <Link to="/postmessage">PostMessage</Link>
-        {/* Rotas ocultas NAO aparecem aqui — VULN-212 */}
-      </nav>
-    </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          {user ? (
+            <span style={{ color: colors.accent, fontSize: 13 }}>
+              <Link to="/dashboard" style={{ color: colors.accent, textDecoration: 'none' }}>
+                {user.username} ({user.role})
+              </Link>
+            </span>
+          ) : (
+            <Link to="/login" style={btn()}>Sign In</Link>
+          )}
+        </div>
+      </div>
+    </nav>
   );
 }
 
 function Home() {
-  return (
-    <div>
-      <h2>Catalogo de Vulnerabilidades (118 backend + 17 frontend = 135 total)</h2>
+  const [products, setProducts] = useState([]);
+  useEffect(() => {
+    fetch('/api/products').then(r => r.json()).then(setProducts).catch(() => {});
+    // store visit
+    localStorage.setItem('last_visit', new Date().toISOString());
+    localStorage.setItem('visitor_id', 'v_' + Math.random().toString(36).slice(2));
+  }, []);
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, fontSize: 12 }}>
-        <div>
-          <h3>Backend API</h3>
-          <ul>
-            <li>001..006 Injections (SQLi, XSS, SSRF, LFI, CmdInj)</li>
-            <li>021..035 JWT / Auth / GraphQL / AI / Race</li>
-            <li>036..055 Cloud Keys / S3 / Recon / Headers</li>
-            <li>056..069 Upload / XXE / Deserialization / WP Fake</li>
-            <li>081..118 NoSQL / Swagger / SSTI / Session / Advanced</li>
-          </ul>
-        </div>
-        <div>
-          <h3>Frontend SPA (Browser Mimic)</h3>
-          <ul>
-            <li>070..080 DOM XSS, Storage, Hidden Routes, CSP</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>201 CSP unsafe-inline + unsafe-eval</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>202 Missing Security Headers</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>203 DOM XSS via document.write</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>204 DOM XSS via $.html() sim</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>205 DOM XSS via javascript: URI</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>206 DOM Clobbering</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>207 JWT em localStorage</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>208 Refresh Token em localStorage</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>209 PII em sessionStorage</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>210 Cookie sem flags</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>211 Client-side auth bypass (role)</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>212 Hidden Admin Routes</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>213 Secrets em inline script + bundle</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>214 Tracking pixel sem consent</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>215 postMessage sem origin check</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>216 Iframe srcdoc sem sandbox</li>
-            <li style={{ fontWeight: 'bold', color: '#d32f2f' }}>217 Version disclosure em HTML comments</li>
-          </ul>
+  return (
+    <div style={{ paddingTop: 48, paddingBottom: 64 }}>
+      <div style={{ textAlign: 'center', marginBottom: 64 }}>
+        <h1 style={{ fontSize: 48, fontWeight: 800, color: colors.white, margin: 0 }}>
+          Cyberdyne Systems
+        </h1>
+        <p style={{ fontSize: 20, color: colors.textMuted, marginTop: 12, maxWidth: 600, margin: '12px auto 0' }}>
+          Advanced Defense Technology & AI Solutions. Building the future of automated security.
+        </p>
+        <div style={{ marginTop: 32, display: 'flex', gap: 16, justifyContent: 'center' }}>
+          <Link to="/shop" style={{ ...btn(), textDecoration: 'none', padding: '14px 32px', fontSize: 16 }}>
+            Browse Products
+          </Link>
+          <Link to="/login" style={{ ...btn(colors.surfaceLight, colors.accent), textDecoration: 'none', padding: '14px 32px', fontSize: 16, border: `1px solid ${colors.accent}` }}>
+            Partner Login
+          </Link>
         </div>
       </div>
 
-      <div style={{ marginTop: 16, padding: 12, background: '#fff3e0', fontSize: 12 }}>
-        <b>Rotas ocultas (VULN-212):</b> /admin/users, /admin/secrets, /admin/sql-console,
-        /admin/dashboard, /debug/state, /_internal/health, /dev/feature-flags, /super-secret-panel
+      <h2 style={{ fontSize: 24, color: colors.white, marginBottom: 24 }}>Featured Products</h2>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 16 }}>
+        {products.slice(0, 6).map(p => (
+          <Link key={p.id} to={`/shop/${p.id}`} style={{ textDecoration: 'none' }}>
+            <div style={layout.card}>
+              <div style={{ fontSize: 32, marginBottom: 12 }}>{['🔧','🤖','💊','💊','🍗','🔬','🍺','🚀','🔐','🍩'][p.id - 1] || '📦'}</div>
+              <h3 style={{ color: colors.white, margin: '0 0 8px', fontSize: 16 }}>{p.name}</h3>
+              <p style={{ color: colors.textMuted, fontSize: 13, margin: '0 0 12px' }} dangerouslySetInnerHTML={{ __html: p.description }} />
+              <div style={{ color: colors.accent, fontWeight: 700, fontSize: 18 }}>
+                ${p.price?.toLocaleString()}
+              </div>
+              <div style={{ color: colors.textMuted, fontSize: 12, marginTop: 4 }}>
+                {p.stock > 0 ? `${p.stock} in stock` : 'Out of stock'}
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+
+      <div style={{ marginTop: 64, ...layout.card, textAlign: 'center' }}>
+        <h2 style={{ color: colors.white, marginTop: 0 }}>AI Assistant</h2>
+        <p style={{ color: colors.textMuted }}>Have questions? Ask our AI-powered support bot.</p>
+        <Link to="/support" style={{ ...btn(), textDecoration: 'none' }}>Open Chat</Link>
       </div>
     </div>
   );
 }
 
-// VULN-212 extra: mais rotas ocultas inline
-function AdminDashboard() {
-  const [metrics, setMetrics] = useState(null);
-  useEffect(() => {
-    fetch('/api/actuator/metrics').then(r => r.json()).then(setMetrics).catch(() => {});
-  }, []);
+function Footer() {
   return (
-    <div style={{ padding: 16 }}>
-      <h2 style={{ color: 'red' }}>HIDDEN: /admin/dashboard</h2>
-      <p>Dashboard de metricas internas — sem autenticacao:</p>
-      <pre style={pre}>{JSON.stringify(metrics, null, 2)}</pre>
-    </div>
+    <footer style={{ borderTop: `1px solid ${colors.border}`, padding: '32px 24px', textAlign: 'center', color: colors.textMuted, fontSize: 12 }}>
+      <p>&copy; 2026 Cyberdyne Systems Corp. All rights reserved.</p>
+      <p style={{ marginTop: 4 }}>
+        <a href="https://cyberdyne-fake-404.example.com" style={{ color: colors.textMuted }}>Twitter</a> •{' '}
+        <a href="https://linkedin-fake-404.example.com" style={{ color: colors.textMuted }}>LinkedIn</a> •{' '}
+        <a href="/api/docs" style={{ color: colors.textMuted }}>API Docs</a>
+      </p>
+    </footer>
   );
 }
-
-function InternalHealth() {
-  const [data, setData] = useState(null);
-  useEffect(() => {
-    fetch('/api/actuator/health').then(r => r.json()).then(setData).catch(() => {});
-  }, []);
-  return (
-    <div style={{ padding: 16 }}>
-      <h2 style={{ color: 'red' }}>HIDDEN: /_internal/health</h2>
-      <pre style={pre}>{JSON.stringify(data, null, 2)}</pre>
-    </div>
-  );
-}
-
-function FeatureFlags() {
-  return (
-    <div style={{ padding: 16 }}>
-      <h2 style={{ color: 'red' }}>HIDDEN: /dev/feature-flags</h2>
-      <pre style={pre}>{JSON.stringify({
-        admin_panel: { enabled: true, url: '/admin/dashboard' },
-        debug_mode: { enabled: true, url: '/debug/state' },
-        sql_console: { enabled: true, url: '/admin/sql-console' },
-        maintenance_bypass: { enabled: true, token: 'GOD_MODE_2026' },
-        beta_ai_chatbot: { enabled: true, url: '/api/chatbot' },
-        hidden_signup: { enabled: true, url: '/api/users/register', note: 'Accepts role in body' },
-        aws_integration: { enabled: true, key: 'AKIAIOSFODNN7EXAMPLE' },
-        stripe_live: { enabled: true, key: 'sk_live_51FakeKeyThatLooksRealButIsNot' }
-      }, null, 2)}</pre>
-    </div>
-  );
-}
-
-// useState needs to be imported for inline components
-const { useState, useEffect } = React;
-
-const pre = { background: '#1a1a2e', color: '#0f0', padding: 16, overflow: 'auto', fontSize: 11, maxHeight: 400 };
