@@ -1,0 +1,4 @@
+**/node_modules
+**/dist
+**/.git
+backend/src/db/vulnhub.db
