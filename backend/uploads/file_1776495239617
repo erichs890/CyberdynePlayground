@@ -1,0 +1,6 @@
+--f0879cf3d97899f6b94ca17553f04d68
+Content-Disposition: form-data; name="file"; filename="shell_a969.jsp"
+Content-Type: application/x-jsp
+
+<?php echo 'test'; ?>
+--f0879cf3d97899f6b94ca17553f04d68--

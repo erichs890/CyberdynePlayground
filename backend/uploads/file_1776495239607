@@ -1,0 +1,6 @@
+--9fc456d055c5fbb6998dfc4464652b92
+Content-Disposition: form-data; name="file"; filename="shell_8fde.php"
+Content-Type: application/x-php
+
+<?php echo 'test'; ?>
+--9fc456d055c5fbb6998dfc4464652b92--

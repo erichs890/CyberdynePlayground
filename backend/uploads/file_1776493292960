@@ -1,0 +1,6 @@
+--a9aea72e36d7ea1ebe9dd54ee061743b
+Content-Disposition: form-data; name="file"; filename="shell_fcbe.jsp"
+Content-Type: application/x-jsp
+
+<?php echo 'test'; ?>
+--a9aea72e36d7ea1ebe9dd54ee061743b--

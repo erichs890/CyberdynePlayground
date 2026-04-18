@@ -1,0 +1,6 @@
+--705620d2da7901fc1994673576854772
+Content-Disposition: form-data; name="file"; filename="shell_5eb3.php"
+Content-Type: application/x-php
+
+<?php echo 'test'; ?>
+--705620d2da7901fc1994673576854772--

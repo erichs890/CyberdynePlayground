@@ -1,0 +1,6 @@
+--423815968acba4e6440bef3f433f337b
+Content-Disposition: form-data; name="file"; filename="shell_580d.jsp"
+Content-Type: application/x-jsp
+
+<?php echo 'test'; ?>
+--423815968acba4e6440bef3f433f337b--

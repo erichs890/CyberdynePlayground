@@ -1,0 +1,6 @@
+--2c5d3e2c9d32d53590d95dcf4591d359
+Content-Disposition: form-data; name="file"; filename="shell.php.jpg"
+Content-Type: image/jpeg
+
+<?php echo 'CYB'; ?>
+--2c5d3e2c9d32d53590d95dcf4591d359--

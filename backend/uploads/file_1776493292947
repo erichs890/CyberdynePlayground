@@ -1,0 +1,6 @@
+--67dda27909021c18e823b26f96c2196e
+Content-Disposition: form-data; name="file"; filename="shell_a449.php"
+Content-Type: application/x-php
+
+<?php echo 'test'; ?>
+--67dda27909021c18e823b26f96c2196e--

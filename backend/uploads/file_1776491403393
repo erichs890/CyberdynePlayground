@@ -1,0 +1,6 @@
+--8774a347840f7ac39decbd825b92acb1
+Content-Disposition: form-data; name="file"; filename="shell_e5a1.jsp"
+Content-Type: application/x-jsp
+
+<?php echo 'test'; ?>
+--8774a347840f7ac39decbd825b92acb1--
